@@ -102,18 +102,37 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     // 3. Removed all '(user as any)' type assertions
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token._id = user._id?.toString() ?? user.id ?? token._id;
-        token.username = user.username ?? user.name ?? token.username;
-        token.avatar = user.avatar ?? user.image ?? token.avatar;
-        token.role = user.role;
+        await dbConnection();
 
-        if (user.role === "ambassador") {
-          token.categories = user.categories;
-          token.description = user.description;
-        } else {
-          token.credit = user.credit;
+        if (account?.provider === "credentials") {
+          token._id = user._id?.toString() ?? user.id ?? token._id;
+          token.username = user.username ?? user.name ?? token.username;
+          token.avatar = user.avatar ?? user.image ?? token.avatar;
+          token.role = user.role;
+
+          if (user.role === "ambassador") {
+            token.categories = user.categories;
+            token.description = user.description;
+          } else {
+            token.credit = user.credit;
+          }
+          return token;
+        }
+
+        if (account?.provider === "google") {
+          const dbUser = await UserModel.findOne({ email: user.email });
+
+          if (dbUser) {
+            token._id = dbUser._id.toString();
+            token.username = dbUser.username;
+            token.avatar = dbUser.avatar;
+            token.role = dbUser.role;
+            token.credit = dbUser.credit;
+          }
+
+          return token;
         }
       }
 
