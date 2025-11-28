@@ -1,376 +1,362 @@
 "use client";
-
+import Navbar from "@/components/Navbar";
+import {
+  AlertTriangle,
+  Annoyed,
+  BookOpen,
+  BrainCircuit,
+  Frown,
+  Laugh,
+  Mail,
+  Meh,
+  MessageSquare,
+  Phone,
+  Smile,
+  User,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
+import Footer from "@/components/Footer";
+
+const supportFeatures = [
+  {
+    icon: User,
+    title: "Professional Support",
+    description:
+      "Connect with licensed therapists and counselors who understand your journey.",
+    imageUrl: "/assets/counselling.jpg", // Example image
+  },
+  {
+    icon: BrainCircuit,
+    title: "Mindfulness Practices",
+    description:
+      "Guided meditation, breathing exercises, and yoga for daily wellness.",
+    imageUrl: "/assets/mindfulness.jpg", // Example image
+  },
+  {
+    icon: Users,
+    title: "Community Support",
+    description:
+      "Join a supportive community where you can share and connect with others.",
+    imageUrl: "/assets/community.jpg", // Example image
+  },
+  {
+    icon: BookOpen,
+    title: "Educational Resources",
+    description:
+      "Access articles, videos, and tools to better understand mental health.",
+    imageUrl: "/assets/library.jpg", // Example image
+  },
+];
+
+const moodOptions = [
+  {
+    label: "Excellent",
+    icon: Laugh,
+    color: "text-yellow-500",
+    bg: "bg-yellow-50",
+    accent: "ring-yellow-500",
+  },
+  {
+    label: "Good",
+    icon: Smile,
+    color: "text-green-500",
+    bg: "bg-green-50",
+    accent: "ring-green-500",
+  },
+  {
+    label: "Okay",
+    icon: Meh,
+    color: "text-blue-500",
+    bg: "bg-blue-50",
+    accent: "ring-blue-500",
+  },
+  {
+    label: "Difficult",
+    icon: Frown,
+    color: "text-orange-500",
+    bg: "bg-orange-50",
+    accent: "ring-orange-500",
+  },
+  {
+    label: "Struggling",
+    icon: Annoyed,
+    color: "text-red-500",
+    bg: "bg-red-50",
+    accent: "ring-red-500",
+  },
+];
+
+const immediateSupportOptions = [
+  {
+    icon: Phone,
+    title: "Crisis Hotline",
+    details: "24/7 support available",
+    contact: "1-800-273-8255",
+    iconBg: "bg-red-50",
+    iconColor: "text-red-500",
+  },
+  {
+    icon: MessageSquare,
+    title: "Live Chat",
+    details: "Chat with a counselor",
+    contact: "Start Chat",
+    iconBg: "bg-blue-50",
+    iconColor: "text-blue-500",
+  },
+  {
+    icon: Mail,
+    title: "Email Support",
+    details: "Get help via email",
+    contact: "support@luminwell.com",
+    iconBg: "bg-purple-50",
+    iconColor: "text-purple-500",
+  },
+];
 
 export default function Home() {
-  // === Countdown to launch/cohort date (set your date here) ===
-  const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
-  useEffect(() => {
-    const target = new Date();
-    target.setMonth(target.getMonth() + 1); // ← change to your hard date if you have one
-    const tick = () => {
-      const now = new Date().getTime();
-      const diff = Math.max(target.getTime() - now, 0);
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const m = Math.floor((diff / (1000 * 60)) % 60);
-      const s = Math.floor((diff / 1000) % 60);
-      setTimeLeft({ d, h, m, s });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+  const [selectedMood, setSelectedMood] = useState<string | null>(null);
   return (
     <>
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-800">
-      {/* ================= NAVBAR ================= */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/70 backdrop-blur">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <a href="#home" className="flex items-center gap-2 font-semibold">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-sky-100">
-              {/* Simple heart/handshake mark (placeholder) */}
-              <span className="sr-only">Luminwell</span>
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <path d="M12 21s-8-4.438-8-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6.562-8 11-8 11z" />
-              </svg>
-            </span>
-            <span className="text-xl tracking-tight">Luminwell</span>
-          </a>
-          <div className="hidden items-center gap-8 text-sm md:flex">
-            <a href="#experience" className="text-slate-600 hover:text-slate-900">What you’ll get</a>
-            <a href="#ambassadors" className="text-slate-600 hover:text-slate-900">Ambassadors</a>
-            <a href="#plans" className="text-slate-600 hover:text-slate-900">Plans</a>
-            <a href="#faq" className="text-slate-600 hover:text-slate-900">FAQ</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="#signin" className="hidden rounded-2xl px-3 py-2 text-sm hover:bg-slate-100 sm:inline-block">Sign in</a>
-            <a href="#get-started" className="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Get started</a>
-          </div>
-        </nav>
+      <header className=" inset-x-0 top-0 z-50">
+        <Navbar open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} />
       </header>
-
-      {/* ================= HERO ================= */}
-      <section id="home" className="pt-16 sm:pt-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-          <div>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Rest & Restore—then reconnect with <span className="text-sky-600">Luminwell</span>
-            </h1>
-            <p className="mt-5 max-w-prose text-lg text-slate-600">
-              A compassionate, secure peer-support space for students and young adults.
-              Exhale here. Share what’s on your mind. Take the next gentle step.
-            </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <a href="#get-started" className="rounded-2xl bg-sky-600 px-5 py-3 text-center text-sm font-medium text-white hover:bg-sky-700">
-                Secure your spot
-              </a>
-              <a href="#contact" className="rounded-2xl border border-slate-300 px-5 py-3 text-center text-sm font-medium hover:bg-slate-100">
-                Message us
-              </a>
-            </div>
-
-            <div className="mt-6 grid max-w-md grid-cols-3 gap-4 text-center">
-              <Stat label="24/7" sub="availability" />
-              <Stat label="Anonymous" sub="by default" />
-              <Stat label="Encrypted" sub="in transit & at rest" />
-            </div>
-          </div>
-
-          {/* Right side card / quick check-in */}
-          <div className="lg:pl-8">
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-lg">
-              <div className="border-b border-slate-200 px-6 py-4">
-                <h3 className="text-lg font-semibold">Quick check-in</h3>
-              </div>
-              <div className="space-y-4 px-6 py-5">
-                <label htmlFor="mood" className="text-sm text-slate-600">How are you feeling today?</label>
-                <input id="mood" placeholder="e.g., anxious about exams" className="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300" />
-                <div className="flex gap-3">
-                  <a href="#match" className="rounded-2xl bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700">Match me</a>
-                  <a href="#self-help" className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100">Try self-help</a>
-                </div>
-                <p className="text-xs text-slate-400">Privacy details in our Trust section.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ============ COUNTDOWN ============ */}
-        <div className="mx-auto mt-12 max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-slate-200 bg-white">
-            <div className="grid grid-cols-2 gap-6 px-6 py-8 text-center sm:grid-cols-4">
-              <CountdownBox label="Days" value={timeLeft.d} />
-              <CountdownBox label="Hours" value={timeLeft.h} />
-              <CountdownBox label="Mins" value={timeLeft.m} />
-              <CountdownBox label="Secs" value={timeLeft.s} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= WHAT YOU'LL GET ================= */}
-      <section id="experience" className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">What you’ll experience</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Feature title="Compassionate peer chats" desc="Talk to trained student ambassadors who get it." />
-            <Feature title="AI-assisted matching" desc="Find the right listener faster with preferences you control." />
-            <Feature title="Safety & privacy" desc="Anonymous by default; encrypted in transit and at rest." />
-            <Feature title="On your schedule" desc="Drop-in check-ins or longer conversations—your choice." />
-            <Feature title="Gentle progress tracking" desc="Reflect on small wins and see trends over time." />
-            <Feature title="Self-help toolkit" desc="Breathing, grounding, and mini-exercises curated for you." />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= AMBASSADORS ================= */}
-      <section id="ambassadors" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">Meet your ambassadors</h2>
-          <p className="mt-3 max-w-3xl text-slate-600">
-            Real students and recent grads with lived experience and evidence-informed training. Supervised by our trust & safety team.
-          </p>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Person name="Alex (she/her)" role="Senior, Psychology" blurb="Peer mentor for academic stress & life transitions." />
-            <Person name="Ravi (he/him)" role="MEng, 1st year" blurb="International student support, homesickness, and balance." />
-            <Person name="Maya (they/them)" role="CS, 3rd year" blurb="Anxiety-friendly goal setting & grounding techniques." />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= LOCATION / AVAILABILITY ================= */}
-      <section id="location" className="py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">Where we’re available</h2>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            <Info title="Canada (pilot)" desc="Ontario campuses first—expanding soon." />
-            <Info title="Virtual first" desc="Private, secure chat from anywhere." />
-            <Info title="Crisis resources" desc="We link to local hotlines if you need urgent help." />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= PLANS ================= */}
-      <section id="plans" className="bg-slate-50 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">Choose your plan</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <Plan tier="Free" price="$0" points={["Anonymous peer chat", "Self-help toolkit", "Basic progress tracking"]} cta="Start free" />
-            <Plan
-              tier="Plus"
-              price="$4.99/mo"
-              points={["Priority matching", "Expanded reflection", "Early access to features"]}
-              cta="Go Plus"
-              highlight
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= GALLERY ================= */}
-      <section id="gallery" className="bg-white py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">A glimpse into the vibe</h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Gallery label="Gentle UX" />
-            <Gallery label="Ambassador training" />
-            <Gallery label="Self-help tools" />
-            <Gallery label="Anonymous by default" />
-            <Gallery label="Campus pilot" />
-            <Gallery label="Human-first tech" />
-          </div>
-        </div>
-      </section>
-
-      {/* ================= FAQ ================= */}
-      <section id="faq" className="py-20">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-3xl font-bold sm:text-4xl">Logistics & FAQs</h2>
-          <div className="mt-10 space-y-6">
-            <QA q="Is Luminwell therapy?" a="No. It’s peer support. We provide crisis resources and encourage professional care when needed." />
-            <QA q="Is it anonymous?" a="Yes—anonymous by default. You control what you share." />
-            <QA q="Who are ambassadors?" a="Trained students and recent grads with supervision and QA." />
-            <QA q="How fast can I connect?" a="Usually within minutes depending on availability and preferences." />
-            <QA q="What about privacy?" a="We minimize data, encrypt in transit & at rest, and never run ads." />
-          </div>
-          <div className="mt-10 text-center">
-            <a href="#contact" className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-medium text-white hover:bg-sky-700">Let’s chat</a>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= FINAL CTA ================= */}
-      <section id="get-started" className="bg-slate-50 py-20">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold sm:text-4xl">Ready to exhale?</h2>
-          <p className="mt-4 text-slate-600">Reserve your first conversation—free, anonymous, and kind.</p>
-          <div className="mt-6 flex items-center justify-center gap-3">
-            <a className="rounded-2xl bg-sky-600 px-5 py-3 text-sm font-medium text-white hover:bg-sky-700" href="#signup">Create account</a>
-            <a className="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-medium hover:bg-slate-100" href="#signin">Sign in</a>
-          </div>
-        </div>
-      </section>
-
-      {/* ================= FOOTER ================= */}
-      <footer id="contact" className="border-t border-slate-200 py-10">
-        <div className="mx-auto grid max-w-7xl gap-6 px-4 text-sm md:grid-cols-3 sm:px-6 lg:px-8">
-          <div>
-            <div className="flex items-center gap-2 font-semibold">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-sky-100">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  <path d="M12 21s-8-4.438-8-11a5 5 0 0 1 9-3 5 5 0 0 1 9 3c0 6.562-8 11-8 11z" />
-                </svg>
-              </span>
+      {/* hero section */}
+      <section className="bg-[linear-gradient(180deg,_rgba(219,_234,_254,_0.50)_0%,_rgba(243,_232,_255,_0.50)_100%)] isolate px-6 pt-14 lg:px-8">
+        <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+          <div className="text-center">
+            <h1 className="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl dark:text-white">
               Luminwell
+            </h1>
+            <div className="hidden sm:mb-8 sm:flex sm:justify-center">
+              <div className="relative px-3 py-4 text-gray-600 dark:text-gray-400">
+                <h1>Your Mental Wellness Starts Here</h1>
+              </div>
             </div>
-            <p className="mt-3 max-w-xs text-slate-500">
-              Compassionate peer support for students and young adults. Not a crisis service.
+            <p className="mt-8 text-lg font-medium text-pretty text-gray-500 sm:text-xl/8 dark:text-gray-400">
+              Find peace, balance, and support on your path to better mental
+              health. We&apos;re here to help you thrive with tools, resources, and a
+              caring community.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <Link
+                href="/sign-in"
+                className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 dark:focus-visible:outline-blue-500">
+                Get started
+              </Link>
+              <Link
+                href="#"
+                className="text-sm/6 font-semibold text-gray-900 dark:text-white">
+                Learn more <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="py-24 sm:py-32 px-6 lg:px-8 bg-white dark:bg-gray-950">
+        <div className="mx-auto max-w-7xl">
+          {/* Section Header */}
+          <div className="text-center mb-16">
+            <h2 className="text-base font-semibold leading-7 text-indigo-600 dark:text-indigo-400">
+              How We Support You
+            </h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+              Comprehensive tools and resources designed to support your mental
+              wellness journey
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <p className="font-medium">Explore</p>
-              <ul className="space-y-1 text-slate-600">
-                <li><a className="hover:text-slate-900" href="#experience">What you’ll get</a></li>
-                <li><a className="hover:text-slate-900" href="#ambassadors">Ambassadors</a></li>
-                <li><a className="hover:text-slate-900" href="#plans">Plans</a></li>
-              </ul>
-            </div>
-            <div className="space-y-2">
-              <p className="font-medium">Company</p>
-              <ul className="space-y-1 text-slate-600">
-                <li><a className="hover:text-slate-900" href="#">About</a></li>
-                <li><a className="hover:text-slate-900" href="#">Careers</a></li>
-                <li><a className="hover:text-slate-900" href="#">Contact</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="text-slate-500">
-            <p className="font-medium text-slate-700">Stay in the loop</p>
-            <p className="mt-2">Get updates about new features and ambassador openings.</p>
-            <form className="mt-3 flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                aria-label="Email address"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-sky-300"
-              />
-              <button className="rounded-2xl bg-sky-600 px-4 py-2 text-white hover:bg-sky-700">Subscribe</button>
-            </form>
-            <p className="mt-3 text-xs">By subscribing, you agree to our privacy policy.</p>
+
+          {/* Feature Grid */}
+          <div className="mx-auto grid max-w-2xl grid-cols-1 gap-12 sm:gap-16 lg:max-w-none lg:grid-cols-2">
+            {supportFeatures.map((feature) => {
+              const Icon = feature.icon; // Component from lucide-react
+              return (
+                <div
+                  key={feature.title}
+                  className="group flex flex-col rounded-2xl border border-gray-100 dark:border-gray-800 shadow-md hover:shadow-xl transition-shadow duration-300 ease-in-out bg-gray-50 dark:bg-gray-900/50">
+                  <div className="aspect-video w-full overflow-hidden rounded-t-2xl">
+                    {" "}
+                    <Image
+                      src={feature.imageUrl}
+                      alt={feature.title}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+
+                  <div className="p-8 flex flex-col gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 p-3 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400">
+                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      </div>
+
+                      <h3 className="text-xl my-1 font-semibold leading-7 text-gray-900 dark:text-white pt-1">
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    <p className="text-base text-gray-600 dark:text-gray-400 pl-16 -mt-3">
+                      {feature.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-        <div className="mt-8 text-center text-xs text-slate-400">© {new Date().getFullYear()} Luminwell. All rights reserved.</div>
+      </section>
+      <section className="py-24 sm:py-32 px-6 lg:px-8 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+        <div className="mx-auto max-w-7xl">
+          {/* Header */}
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+              How Are You Feeling Today?
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+              Track your mood and emotions to better understand your mental
+              wellness
+            </p>
+          </div>
+
+          {/* Mood Grid */}
+          <div className="flex justify-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 lg:gap-6 max-w-5xl w-full">
+              {moodOptions.map((mood) => {
+                const MoodIcon = mood.icon;
+                // Check selection against the local state
+                const isSelected = selectedMood === mood.label;
+
+                return (
+                  <div
+                    key={mood.label}
+                    onClick={() => setSelectedMood(mood.label)}
+                    role="button"
+                    tabIndex={0}
+                    className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-xl h-36 sm:h-40 transition-all duration-200 cursor-pointer text-center
+                      ${mood.bg} 
+                      ${
+                        isSelected
+                          ? `${mood.accent} ring-4 shadow-lg scale-[1.02]`
+                          : "shadow-sm hover:shadow-md"
+                      } 
+                      border border-gray-200 dark:border-gray-700`}>
+                    {/* Icon */}
+                    <MoodIcon
+                      className={`w-8 h-8 sm:w-10 sm:h-10 ${mood.color}`}
+                      aria-hidden="true"
+                    />
+
+                    {/* Label */}
+                    <span
+                      className={`mt-3 text-sm sm:text-base font-semibold transition-colors 
+                        ${isSelected ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-300"}`}>
+                      {mood.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Local State Display */}
+          {selectedMood ? (
+            <div className="mt-12 text-center text-xl font-medium text-gray-700 dark:text-gray-300">
+              You have currently selected:{" "}
+              <span className="font-bold text-blue-600 dark:text-blue-400">
+                {selectedMood}
+              </span>
+              .
+            </div>
+          ) : (
+            <div className="mt-12 text-center text-xl font-medium text-gray-700 dark:text-gray-300">
+              Click an icon above to log your current mood!
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="py-24 sm:py-32 px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+        <div className="mx-auto max-w-7xl">
+          {/* Header */}
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-white">
+              Need Immediate Support?
+            </h2>
+            <p className="mt-4 text-lg text-gray-600 dark:text-gray-400">
+              If you&apos;re in crisis or need someone to talk to, help is available
+            </p>
+          </div>
+
+          {/* Support Cards Grid */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 max-w-5xl mx-auto">
+            {immediateSupportOptions.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.title}
+                  className="bg-white dark:bg-gray-950 p-8 rounded-2xl shadow-lg text-center border border-gray-100 dark:border-gray-700 transition hover:shadow-xl">
+                  <div className="flex justify-center mb-6">
+                    <div className={`p-4 rounded-full ${item.iconBg}`}>
+                      <Icon className={`w-8 h-8 ${item.iconColor}`} />
+                    </div>
+                  </div>
+
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {item.details}
+                  </p>
+
+                  {/* Contact Action (Link or Button) */}
+                  {item.title === "Live Chat" ? (
+                    <button className="font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition mt-2">
+                      {item.contact}
+                    </button>
+                  ) : (
+                    <Link
+                      href={
+                        item.title === "Crisis Hotline"
+                          ? `tel:${item.contact}`
+                          : `mailto:${item.contact}`
+                      }
+                      className="font-bold text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition mt-2 block">
+                      {item.contact}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Emergency Services Banner */}
+          <div className="mt-20 p-6 sm:p-8 rounded-xl border-t-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 max-w-5xl mx-auto shadow-md">
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="flex-shrink-0 w-6 h-6 text-yellow-600 dark:text-yellow-400 mt-1" />
+              <div>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Emergency Services
+                </h4>
+                <p className="text-gray-700 dark:text-gray-300 mb-4">
+                  If you or someone you know is in immediate danger, please call
+                  **988** or go to your nearest emergency room. You are not
+                  alone, and help is available.
+                </p>
+                <button
+                  onClick={() => window.location.assign("https://988.ca")}
+                  className="rounded-xl bg-white dark:bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                  Get Help!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <footer className="bg-gray-950 border-t border-gray-800">
+        <Footer />
       </footer>
-    </div> </>
-  );
-}
-
-/* ================= SMALL COMPONENTS ================= */
-
-function Stat({ label, sub }: { label: string; sub: string }) {
-  return (
-    <div>
-      <p className="text-2xl font-semibold">{label}</p>
-      <p className="text-xs text-slate-500">{sub}</p>
-    </div>
-  );
-}
-
-function CountdownBox({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <p className="tabular-nums text-3xl font-semibold">{String(value).padStart(2, "0")}</p>
-      <p className="text-xs uppercase tracking-wide text-slate-500">{label}</p>
-    </div>
-  );
-}
-
-function Feature({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 hover:shadow-md">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-slate-600">{desc}</p>
-    </div>
-  );
-}
-
-function Person({ name, role, blurb }: { name: string; role: string; blurb: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white">
-      <div className="flex items-center gap-4 border-b border-slate-200 px-5 py-4">
-        <div className="h-12 w-12 overflow-hidden rounded-full bg-slate-100">
-          {/* Drop an ambassador headshot at /public/ambassadors/<name>.jpg if you like */}
-          <Image src="/avatar-placeholder.png" alt={`${name} headshot`} width={48} height={48} />
-        </div>
-        <div>
-          <p className="text-base font-semibold">{name}</p>
-          <p className="text-sm text-slate-500">{role}</p>
-        </div>
-      </div>
-      <div className="px-5 py-4 text-slate-600">{blurb}</div>
-    </div>
-  );
-}
-
-function Info({ title, desc }: { title: string; desc: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-2 text-slate-600">{desc}</p>
-    </div>
-  );
-}
-
-function Plan({
-  tier,
-  price,
-  points,
-  cta,
-  highlight,
-}: {
-  tier: string;
-  price: string;
-  points: string[];
-  cta: string;
-  highlight?: boolean;
-}) {
-  return (
-    <div className={`rounded-2xl border bg-white p-6 ${highlight ? "border-sky-300 ring-1 ring-sky-200" : "border-slate-200"}`}>
-      <div className="flex items-baseline justify-between">
-        <h3 className="text-xl font-semibold">{tier}</h3>
-        <div className="text-2xl font-bold">{price}</div>
-      </div>
-      <ul className="mt-4 list-inside list-disc space-y-1 text-slate-600">
-        {points.map((p, i) => (
-          <li key={i}>{p}</li>
-        ))}
-      </ul>
-      <a href="#get-started" className="mt-4 block rounded-2xl bg-sky-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-sky-700">
-        {cta}
-      </a>
-    </div>
-  );
-}
-
-function Gallery({ label }: { label: string }) {
-  return (
-    <div className="grid aspect-video place-items-center rounded-2xl border border-slate-200 bg-slate-100 text-sm text-slate-500">
-      {label}
-    </div>
-  );
-}
-
-function QA({ q, a }: { q: string; a: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <h3 className="text-lg font-semibold">{q}</h3>
-      </div>
-      <div className="px-5 py-4 text-slate-600">{a}</div>
-    </div>
+    </>
   );
 }
