@@ -1,10 +1,17 @@
-import { NextAuthOptions } from "next-auth";
+import { NextAuthOptions, User as NextAuthUser } from "next-auth"; // Import NextAuthUser for authorize return type
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import dbConnection from "@/lib/dbConnection";
 import UserModel from "@/model/User";
-import { User } from "@/model/User";
+import { User } from "@/model/User"; // Your Mongoose User model interface
+
+// Define a type for the credentials object
+interface Credentials {
+  email?: string;
+  password?: string;
+  // NextAuth combines email/username into an 'identifier' field
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,14 +23,18 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
 
-      async authorize(credentials: any): Promise<any> {
+      // 1. Replaced 'any' with 'Credentials' and 'User | null'
+      async authorize(
+        credentials: Credentials | undefined
+      ): Promise<NextAuthUser | null> {
         await dbConnection();
         try {
+          if (!credentials) {
+            return null;
+          }
+
           const user = (await UserModel.findOne({
-            $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
-            ],
+            email: credentials.email,
           })) as User | null;
 
           if (!user) {
@@ -31,11 +42,13 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (!user.password) {
-            throw new Error("User has no password.");
+            throw new Error(
+              "This account was created with Google. Please use the 'Continue with Google' button."
+            );
           }
 
           const isMatch = await bcrypt.compare(
-            credentials.password,
+            credentials.password as string, // Cast as string since it should be present
             user.password
           );
 
@@ -45,6 +58,7 @@ export const authOptions: NextAuthOptions = {
 
           const isAmbassador = user.email.endsWith("@luminwell.ca");
 
+          // The returned object must satisfy the 'User' interface you extended in next-auth.d.ts
           if (isAmbassador) {
             return {
               _id: user._id.toString(),
@@ -54,7 +68,9 @@ export const authOptions: NextAuthOptions = {
               role: "ambassador",
               categories: user.categories,
               description: user.description,
-            };
+              // Must include all non-optional fields defined in next-auth.d.ts
+              credit: user.credit ?? 0,
+            } as NextAuthUser;
           } else {
             return {
               _id: user._id.toString(),
@@ -63,10 +79,17 @@ export const authOptions: NextAuthOptions = {
               avatar: user.avatar,
               role: "user",
               credit: user.credit ?? 0,
-            };
+              // Must include all non-optional fields defined in next-auth.d.ts
+              categories: user.categories ?? [],
+              description: user.description ?? "",
+            } as NextAuthUser;
           }
-        } catch (error: any) {
-          throw new Error(error);
+        } catch (error: unknown) {
+          // 2. Replaced 'any' with 'unknown'
+          if (error instanceof Error) {
+            throw new Error(error.message);
+          }
+          throw new Error("An unknown authentication error occurred.");
         }
       },
     }),
@@ -78,17 +101,38 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    // 3. Removed all '(user as any)' type assertions
+    async jwt({ token, user, account }) {
       if (user) {
-        token._id = user._id?.toString();
-        token.username = user.username;
-        token.avatar = user.avatar;
-        token.role = user.role;
-        if (user.role === "ambassador") {
-          token.categories = user.categories;
-          token.description = user.description;
-        } else {
-          token.credit = user.credit;
+        await dbConnection();
+
+        if (account?.provider === "credentials") {
+          token._id = user._id?.toString() ?? user.id ?? token._id;
+          token.username = user.username ?? user.name ?? token.username;
+          token.avatar = user.avatar ?? user.image ?? token.avatar;
+          token.role = user.role;
+
+          if (user.role === "ambassador") {
+            token.categories = user.categories;
+            token.description = user.description;
+          } else {
+            token.credit = user.credit;
+          }
+          return token;
+        }
+
+        if (account?.provider === "google") {
+          const dbUser = await UserModel.findOne({ email: user.email });
+
+          if (dbUser) {
+            token._id = dbUser._id.toString();
+            token.username = dbUser.username;
+            token.avatar = dbUser.avatar;
+            token.role = dbUser.role;
+            token.credit = dbUser.credit;
+          }
+
+          return token;
         }
       }
 
@@ -126,6 +170,9 @@ export const authOptions: NextAuthOptions = {
             role: "user",
             authProvider: account.provider,
             credit: 0,
+            // Ensure categories and description are included or defaulted for type safety
+            categories: [],
+            description: "",
           });
         }
       }

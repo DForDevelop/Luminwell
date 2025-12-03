@@ -1,71 +1,10 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import { getToken } from "next-auth/jwt";
-// export { default } from "next-auth/middleware";
-
-// export const config = {
-//   matcher: [
-//     "/dashboard/:path",
-//     "/ambassador/:path",
-//     "/sign-in",
-//     "/sign-up",
-//     "/ambassador-sign-up",
-//     "/",
-//   ],
-// };
-
-// export async function middleware(request: NextRequest) {
-//   const token = await getToken({ req: request });
-//   const url = request.nextUrl;
-
-//   //base case: no token
-//   if (
-//     !token &&
-//     (url.pathname.startsWith("/dashboard") ||
-//       url.pathname.startsWith("/ambassador"))
-//   ) {
-//     return NextResponse.redirect(new URL("/sign-in", request.url));
-//   }
-
-//   //if authenticated then navigate to designated dashboard
-//   if (
-//     token &&
-//     (url.pathname.startsWith("/sign-in") ||
-//       url.pathname.startsWith("/sign-up") ||
-//       url.pathname === "/" ||
-//       url.pathname.startsWith("/ambassador-sign-up"))
-//   ) {
-//     if (token.role === "ambassador") {
-//       return NextResponse.redirect(
-//         new URL("/ambassador/dashboard", request.url)
-//       );
-//     } else {
-//       return NextResponse.redirect(new URL("/dashboard", request.url));
-//     }
-//   }
-
-//   //this avoids cross-over page access
-//   if (token) {
-//     if (token.role === "user" && url.pathname.startsWith("/ambassador")) {
-//       return NextResponse.redirect(new URL("/dashboard", request.url));
-//     }
-//     if (token.role === "ambassador" && url.pathname.startsWith("/dashboard")) {
-//       return NextResponse.redirect(
-//         new URL("/ambassador/dashboard", request.url)
-//       );
-//     }
-//   }
-
-//   //default case
-//   return NextResponse.next();
-// }
-
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 export { default } from "next-auth/middleware";
 
 export const config = {
   matcher: [
-    "/dashboard/:path",
+    "/user/:path",
     "/ambassador/:path",
     "/sign-in",
     "/sign-up",
@@ -81,8 +20,9 @@ interface CustomToken extends Record<string, unknown> {
 export async function middleware(request: NextRequest) {
   const token = (await getToken({ req: request })) as CustomToken | null;
   const url = request.nextUrl; // ------------------------------------------------------------------------- // 1. DEFINE PROTECTED PATHS (THE CRITICAL FIX IS HERE) // ------------------------------------------------------------------------- // These paths require a token, but exclude the public sign-up/in pages.
+  const userId = token?._id;
   const isProtectedPath =
-    url.pathname.startsWith("/dashboard") || // Ambassador paths are protected, EXCEPT for the specific sign-up page
+    url.pathname.startsWith("/user") || // Ambassador paths are protected, EXCEPT for the specific sign-up page
     (url.pathname.startsWith("/ambassador") &&
       url.pathname !== "/ambassador-sign-up"); // Paths that are publicly accessible for initial authentication
 
@@ -97,7 +37,9 @@ export async function middleware(request: NextRequest) {
 
   if (token) {
     const dashboardUrl =
-      token.role === "ambassador" ? "/ambassador/dashboard" : "/dashboard"; // If authenticated, redirect away from sign-in/sign-up pages
+      token.role === "ambassador"
+        ? `/ambassador/${userId}/scheduler`
+        : `/user/${userId}/appointments`; // If authenticated, redirect away from sign-in/sign-up pages
 
     if (isPublicAuthPath) {
       return NextResponse.redirect(new URL(dashboardUrl, request.url));
@@ -111,15 +53,18 @@ export async function middleware(request: NextRequest) {
   if (token) {
     // Regular user trying to access ambassador dashboard
     if (token.role === "user" && url.pathname.startsWith("/ambassador")) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(
+        new URL(`/user/${userId}/appointments`, request.url)
+      );
     } // Ambassador trying to access regular user dashboard
 
-    if (token.role === "ambassador" && url.pathname.startsWith("/dashboard")) {
+    if (token.role === "ambassador" && url.pathname.startsWith("/user")) {
       return NextResponse.redirect(
-        new URL("/ambassador/dashboard", request.url)
+        new URL(`/ambassador/${userId}/scheduler`, request.url)
       );
     }
   } // default case (Allow access)
 
   return NextResponse.next();
 }
+[];
